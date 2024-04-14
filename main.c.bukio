@@ -1,0 +1,70 @@
+#include <gtk/gtk.h>
+#include <stdlib.h>
+
+// Global variables to hold color as hex strings
+static gchar bg_color_hex[16];
+static gchar fg_color_hex[16];
+static gchar border_color_hex[16];
+
+// Callback function to retrieve the color and store it as a hex string
+static void on_color_set(GtkColorButton *button, gpointer user_data) {
+    GdkRGBA color;
+    gchar **color_hex = (gchar **)user_data;
+
+    // Get the RGBA color from the color chooser
+    gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(button), &color);
+
+    // Convert the RGBA color to a hex string
+    snprintf(*color_hex, sizeof(*color_hex), "#%02x%02x%02x",
+             (int)(color.red * 255), (int)(color.green * 255), (int)(color.blue * 255));
+
+    // Optionally, you can print out the hex color to verify
+    printf("Selected color: %s\n", *color_hex);
+}
+
+static void activate(GtkApplication *app, gpointer user_data) {
+    GtkWidget *window, *grid, *button, *color_button, *label;
+
+    window = gtk_application_window_new(app);
+    gtk_window_set_title(GTK_WINDOW(window), "Color Picker Example");
+    gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+
+    grid = gtk_grid_new();
+    gtk_container_add(GTK_CONTAINER(window), grid);
+
+    label = gtk_label_new("Background Color:");
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
+    color_button = gtk_color_button_new();
+    gtk_grid_attach(GTK_GRID(grid), color_button, 1, 0, 1, 1);
+    g_signal_connect(color_button, "color-set", G_CALLBACK(on_color_set), &bg_color_hex);
+
+    label = gtk_label_new("Foreground Color:");
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
+    color_button = gtk_color_button_new();
+    gtk_grid_attach(GTK_GRID(grid), color_button, 1, 1, 1, 1);
+    g_signal_connect(color_button, "color-set", G_CALLBACK(on_color_set), &fg_color_hex);
+
+    label = gtk_label_new("Border Color:");
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 1, 1);
+    color_button = gtk_color_button_new();
+    gtk_grid_attach(GTK_GRID(grid), color_button, 1, 2, 1, 1);
+    g_signal_connect(color_button, "color-set", G_CALLBACK(on_color_set), &border_color_hex);
+
+    button = gtk_button_new_with_label("Exit");
+    gtk_grid_attach(GTK_GRID(grid), button, 0, 3, 2, 1);
+    g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_widget_destroy), window);
+
+    gtk_widget_show_all(window);
+}
+
+int main(int argc, char **argv) {
+    GtkApplication *app;
+    int status;
+
+    app = gtk_application_new("org.example.ColorPicker", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+    status = g_application_run(G_APPLICATION(app), argc, argv);
+    g_object_unref(app);
+
+    return status;
+}

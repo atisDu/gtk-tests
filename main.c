@@ -57,7 +57,8 @@ static void saglabat (GtkWidget *widget, gpointer data){
     default:
       break;
     }
-
+    
+    // Šo vajag salabot
     snprintf(komanda, 180, "grep -m %d \'\"#\' %s | sed \'s/#\\([0-9a-fA-F]\\{3,7\\}\\)/%s/g\' -i %s", i, atvertais_fails, krasa, atvertais_fails);
     printf("\nkomanda: %s\ni ir %d", komanda, i);
     system(komanda);
